@@ -112,14 +112,38 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
+# def evaluate_model(individual, model, input_shape, target_digit):
+#     image = np.array(individual).reshape(1, -1)
+#     if isinstance(model, tf.keras.Model):
+#         image = np.array(individual).reshape(1, *input_shape, 1) if len(input_shape) == 2 else np.array(individual).reshape(1, *input_shape)
+#         probabilities = model.predict(image)
+#     else:
+#         probabilities = model.predict_proba(image)
+#     return probabilities[0][target_digit],
+
 def evaluate_model(individual, model, input_shape, target_digit):
+    # Convert the individual (flattened image) into a numpy array and reshape it to match the model's input format
+    # Initially reshape as a flat array (1 sample, many features)
     image = np.array(individual).reshape(1, -1)
+    
+    # Check if the model is a TensorFlow Keras model (e.g., CNN or RNN)
     if isinstance(model, tf.keras.Model):
-        image = np.array(individual).reshape(1, *input_shape, 1) if len(input_shape) == 2 else np.array(individual).reshape(1, *input_shape)
+        # If input shape is 2D (e.g., for CNN), reshape into 4D (batch, height, width, channels)
+        if len(input_shape) == 2:
+            image = np.array(individual).reshape(1, *input_shape, 1)  # Adding the channel dimension for grayscale
+        else:
+            # Otherwise, reshape to the provided 3D shape (used for RNNs or other cases)
+            image = np.array(individual).reshape(1, *input_shape)
+        
+        # Predict the probabilities for each digit (0-9) using the Keras model
         probabilities = model.predict(image)
     else:
+        # For scikit-learn models, use predict_proba to get the class probabilities
         probabilities = model.predict_proba(image)
+    
+    # Return the probability for the target digit (0-9) as a tuple (required by DEAP)
     return probabilities[0][target_digit],
+
 
 def run_evolution(toolbox, ngen, model, input_shape, target_digit, output_subdir, generation_interval):
     os.makedirs(output_subdir, exist_ok=True)
