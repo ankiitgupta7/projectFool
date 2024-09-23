@@ -1,0 +1,2 @@
+model_name,train_accuracy,test_accuracy,model_params
+RNN,0.8529499769210815,0.8411999940872192,15110

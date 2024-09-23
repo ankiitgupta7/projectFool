@@ -1,0 +1,2 @@
+model_name,train_accuracy,test_accuracy,model_params
+CNN,0.9104599952697754,0.7044000029563904,612042
